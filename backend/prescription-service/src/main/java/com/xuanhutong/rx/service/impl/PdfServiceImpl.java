@@ -35,10 +35,14 @@ public class PdfServiceImpl implements PdfService {
         try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
             PdfDocument pdfDoc = new PdfDocument(new PdfWriter(baos));
             Document doc = new Document(pdfDoc); PdfFont font = loadFont();
-            doc.add(new Paragraph(doctor.getClinicName() != null ? doctor.getClinicName() : "悬壶通中医诊所").setFont(font).setFontSize(16).setTextAlignment(TextAlignment.CENTER).setBold());
+            doc.add(new Paragraph(doctor.getClinicName() != null ? doctor.getClinicName() : "悬壶通中医诊所")
+                    .setFont(font).setFontSize(16).setTextAlignment(TextAlignment.CENTER).setBold());
             doc.add(new Paragraph("中药处方笺").setFont(font).setFontSize(12).setTextAlignment(TextAlignment.CENTER));
+            doc.add(new Paragraph("").setFontSize(4));
             doc.add(new Paragraph("病人：" + patientName).setFont(font).setFontSize(9));
             if (rx.getDiagnosis() != null) doc.add(new Paragraph("诊断：" + rx.getDiagnosis()).setFont(font).setFontSize(9));
+            doc.add(new Paragraph("").setFontSize(4));
+
             Table table = new Table(UnitValue.createPercentArray(new float[]{5, 30, 15, 20, 30}));
             table.setWidth(UnitValue.createPercentValue(100));
             for (String h : new String[]{"序号","药材名称","剂量(g)","特殊用法","备注"})
@@ -52,9 +56,22 @@ public class PdfServiceImpl implements PdfService {
                 table.addCell(new Cell().add(new Paragraph("").setFont(font).setFontSize(9)));
             }
             doc.add(table);
+            doc.add(new Paragraph("").setFontSize(4));
             doc.add(new Paragraph("剂数：" + rx.getTotalDoses() + "剂").setFont(font).setFontSize(9));
-            if (rx.getNotes() != null && !rx.getNotes().isEmpty()) doc.add(new Paragraph("用法：" + rx.getNotes()).setFont(font).setFontSize(9));
-            doc.add(new Paragraph("医师签名：" + doctor.getName()).setFont(font).setFontSize(9));
+            if (rx.getNotes() != null && !rx.getNotes().isEmpty())
+                doc.add(new Paragraph("用法：" + rx.getNotes()).setFont(font).setFontSize(9));
+            doc.add(new Paragraph("").setFontSize(12));
+
+            // Signature area
+            if (sig != null && !sig.isEmpty()) {
+                doc.add(new Paragraph("医师签名：" + sig).setFont(font).setFontSize(10));
+            } else {
+                doc.add(new Paragraph("医师签名：_______________").setFont(font).setFontSize(10));
+            }
+            doc.add(new Paragraph("诊所名称：" + (doctor.getClinicName() != null ? doctor.getClinicName() : "")).setFont(font).setFontSize(8));
+            if (rx.getSignedAt() != null) {
+                doc.add(new Paragraph("签署日期：" + rx.getSignedAt().format(FMT)).setFont(font).setFontSize(8));
+            }
             doc.close(); return baos.toByteArray();
         } catch (Exception e) { log.error("PDF error", e); throw new BusinessException(ErrorCode.PDF_GENERATION_FAILED); }
     }

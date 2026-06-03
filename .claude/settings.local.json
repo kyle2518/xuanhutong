@@ -50,7 +50,11 @@
       "Bash(sed -i '' 's|药方管理|处方管理|g' /Users/kylezhang/Developer/xuanhutong/frontend/src/views/prescriptions/PrescriptionListView.vue)",
       "Bash(sed -i '' 's|开新药方|新增处方|g' /Users/kylezhang/Developer/xuanhutong/frontend/src/views/prescriptions/PrescriptionListView.vue)",
       "Bash(sed -i '' 's|药方开单|新增处方|g' /Users/kylezhang/Developer/xuanhutong/frontend/src/views/prescriptions/PrescriptionCreateView.vue)",
-      "Bash(sed -i '' 's|药方开单|处方管理|g' /Users/kylezhang/Developer/xuanhutong/frontend/src/views/DashboardView.vue)"
+      "Bash(sed -i '' 's|药方开单|处方管理|g' /Users/kylezhang/Developer/xuanhutong/frontend/src/views/DashboardView.vue)",
+      "Bash(gradle :prescription-service:compileJava)",
+      "Bash(gradle :prescription-service:bootJar)",
+      "Bash(mysql -u root -pZjz@729029 xuanhutong -e \"ALTER TABLE prescriptions ADD COLUMN signature_text VARCHAR\\(100\\) DEFAULT NULL COMMENT '签署文字';\")",
+      "Bash(echo \"Column added: $?\")"
     ]
   }
 }

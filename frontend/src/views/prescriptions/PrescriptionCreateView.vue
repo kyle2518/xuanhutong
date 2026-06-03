@@ -103,12 +103,34 @@ function applyClassicRx(rx: any) {
   try {
     const composition = JSON.parse(rx.composition)
     items.value = composition.map((item: any) => ({
-      herbId: null, herbName: item.herb_name, dosageGrams: parseInt(item.dosage) || 9, notes: ''
+      herbId: null,
+      herbName: item.herb_name,
+      dosageGrams: parseClassicDosage(item.dosage),
+      notes: item.dosage || ''
     }))
     diagnosis.value = rx.efficacy || ''
     showClassicModal.value = false
     message.success(`已加载经典药方：${rx.name}`)
   } catch { message.error('加载失败，请检查药方数据格式') }
+}
+
+function parseClassicDosage(dosage: string): number {
+  if (!dosage) return 9
+  // Try direct number first
+  const num = parseInt(dosage)
+  if (!isNaN(num)) return num
+  // Parse Chinese dosage units
+  const cleaned = dosage.replace(/约|许|大|小/g, '')
+  if (cleaned.includes('斤')) return Math.round(parseFloat(cleaned) * 500) || 500
+  if (cleaned.includes('两')) return Math.round(parseFloat(cleaned) * 30) || 30
+  if (cleaned.includes('钱')) return Math.round(parseFloat(cleaned) * 3) || 3
+  if (cleaned.includes('分')) return Math.round(parseFloat(cleaned) * 0.3) || 1
+  if (cleaned.includes('升')) return Math.round(parseFloat(cleaned) * 200) || 200
+  if (cleaned.includes('合')) return Math.round(parseFloat(cleaned) * 20) || 20
+  if (cleaned.includes('枚') || cleaned.includes('个')) return parseInt(cleaned) * 5 || 5
+  // Fallback: if it looks like a number with text, try extracting
+  const fallback = parseInt(cleaned.replace(/[^0-9]/g, ''))
+  return !isNaN(fallback) && fallback > 0 ? fallback : 9
 }
 
 // Preview PDF
@@ -221,7 +243,7 @@ async function signPrescription(prescriptionId: number) {
     </div>
 
     <!-- Classic Rx Modal -->
-    <NModal v-model:show="showClassicModal" title="经典药方" style="width: 700px;">
+    <NModal v-model:show="showClassicModal" title="经典药方" preset="card" style="width:700px;" title-style="font-size:18px;font-weight:600;">
       <div style="padding: 12px; max-height: 500px; overflow-y: auto;">
         <NCard v-for="rx in classicList" :key="rx.id" size="small" style="margin-bottom: 8px; cursor: pointer;" @click="applyClassicRx(rx)">
           <div style="font-weight: bold;">{{ rx.name }} <NTag size="small">{{ rx.source }}</NTag></div>
@@ -231,17 +253,19 @@ async function signPrescription(prescriptionId: number) {
     </NModal>
 
     <!-- PDF Preview Modal -->
-    <NModal v-model:show="showPdfPreview" title="药方预览" style="width: 800px;">
-      <div style="padding: 12px;">
-        <iframe v-if="pdfUrl" :src="pdfUrl" width="100%" height="500px" frameborder="0"></iframe>
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 12px;">
+    <NModal v-model:show="showPdfPreview" title="药方预览" preset="card" style="width:850px;" title-style="font-size:18px;font-weight:600;">
+      <div style="padding: 4px;">
+        <iframe v-if="pdfUrl" :src="pdfUrl" width="100%" height="480px" frameborder="0" style="border:1px solid #eee;border-radius:6px;"></iframe>
+      </div>
+      <template #footer>
+        <div style="display:flex;justify-content:space-between;align-items:center;width:100%;">
           <NSpace>
-            <NInput v-model:value="signatureInput" placeholder="请输入签名" />
+            <NInput v-model:value="signatureInput" placeholder="请输入医师签名" style="width:180px;" />
             <NButton type="primary" @click="() => signPrescription(0)">签署并下载</NButton>
           </NSpace>
           <NButton @click="showPdfPreview = false">关闭</NButton>
         </div>
-      </div>
+      </template>
     </NModal>
   </div>
 </template>

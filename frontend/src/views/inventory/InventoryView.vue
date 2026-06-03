@@ -9,12 +9,10 @@ const total = ref(0)
 const page = ref(1)
 const loading = ref(false)
 
-// Edit modal
 const showEditModal = ref(false)
 const editItem = ref<any>({})
 const editForm = ref({ stockGrams: 0, minStockAlert: 0, unitPrice: 0 })
 
-// Add herb modal
 const showAddModal = ref(false)
 const addHerbId = ref<number | null>(null)
 const addLoading = ref(false)
@@ -59,7 +57,6 @@ async function saveEdit() {
   } catch (e: any) { message.error(e.response?.data?.message || '更新失败') }
 }
 
-// Add herb functions
 async function searchAvailableHerbs(keyword: string) {
   herbSearchLoading.value = true
   try {
@@ -77,19 +74,13 @@ async function addHerb() {
   try {
     await inventoryApi.create({ herbId: addHerbId.value })
     message.success('药材已添加到库存')
-    showAddModal.value = false
-    addHerbId.value = null
-    availableHerbs.value = []
+    showAddModal.value = false; addHerbId.value = null; availableHerbs.value = []
     fetchInventory()
   } catch (e: any) { message.error(e.response?.data?.message || '添加失败') }
   finally { addLoading.value = false }
 }
 
-function openAddModal() {
-  addHerbId.value = null
-  availableHerbs.value = []
-  showAddModal.value = true
-}
+function openAddModal() { addHerbId.value = null; availableHerbs.value = []; showAddModal.value = true }
 
 onMounted(fetchInventory)
 </script>
@@ -108,44 +99,42 @@ onMounted(fetchInventory)
     </NCard>
 
     <!-- Edit Modal -->
-    <NModal v-model:show="showEditModal" title="编辑库存">
-      <div style="padding: 20px;">
-        <p style="margin-bottom: 12px;"><strong>药材：</strong>{{ editItem.herbName }}</p>
-        <NForm label-placement="left" label-width="100">
-          <NFormItem label="库存(克)">
-            <NInputNumber v-model:value="editForm.stockGrams" :min="0" />
-          </NFormItem>
-          <NFormItem label="预警值(克)">
-            <NInputNumber v-model:value="editForm.minStockAlert" :min="0" />
-          </NFormItem>
-          <NFormItem label="单价(元/克)">
-            <NInputNumber v-model:value="editForm.unitPrice" :min="0" :step="0.01" />
-          </NFormItem>
-        </NForm>
-        <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 16px;">
+    <NModal v-model:show="showEditModal" title="编辑库存" preset="card" style="width: 460px;" title-style="font-size:18px;font-weight:600;">
+      <NForm label-placement="left" label-width="100">
+        <NFormItem label="药材">{{ editItem.herbName }}</NFormItem>
+        <NFormItem label="库存(克)">
+          <NInputNumber v-model:value="editForm.stockGrams" :min="0" style="width:100%" />
+        </NFormItem>
+        <NFormItem label="预警值(克)">
+          <NInputNumber v-model:value="editForm.minStockAlert" :min="0" style="width:100%" />
+        </NFormItem>
+        <NFormItem label="单价(元/克)">
+          <NInputNumber v-model:value="editForm.unitPrice" :min="0" :step="0.01" style="width:100%" />
+        </NFormItem>
+      </NForm>
+      <template #footer>
+        <NSpace justify="end">
           <NButton @click="showEditModal = false">取消</NButton>
           <NButton type="primary" @click="saveEdit">保存</NButton>
-        </div>
-      </div>
+        </NSpace>
+      </template>
     </NModal>
 
     <!-- Add Herb Modal -->
-    <NModal v-model:show="showAddModal" title="添加药材到库存">
-      <div style="padding: 20px;">
-        <NForm label-placement="left" label-width="80">
-          <NFormItem label="选择药材" required>
-            <NSelect v-model:value="addHerbId" :options="availableHerbs" filterable remote clearable
-              placeholder="输入药材名称搜索" @search="searchAvailableHerbs" :loading="herbSearchLoading" />
-          </NFormItem>
-        </NForm>
-        <p style="font-size: 12px; color: #999; margin-top: -8px;">
-          选择药材后点击添加，初始库存为 0，可在库存列表中编辑具体数值。
-        </p>
-        <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 16px;">
+    <NModal v-model:show="showAddModal" title="添加药材到库存" preset="card" style="width: 500px;" title-style="font-size:18px;font-weight:600;">
+      <NForm label-placement="left" label-width="80">
+        <NFormItem label="选择药材" required>
+          <NSelect v-model:value="addHerbId" :options="availableHerbs" filterable remote clearable
+            placeholder="输入药材名称搜索" @search="searchAvailableHerbs" :loading="herbSearchLoading" />
+        </NFormItem>
+      </NForm>
+      <p style="font-size:12px;color:#999;margin-top:-8px;">选择药材后点击添加，初始库存为 0，可在库存列表中编辑具体数值。</p>
+      <template #footer>
+        <NSpace justify="end">
           <NButton @click="showAddModal = false">取消</NButton>
           <NButton type="primary" :loading="addLoading" @click="addHerb">添加</NButton>
-        </div>
-      </div>
+        </NSpace>
+      </template>
     </NModal>
   </div>
 </template>

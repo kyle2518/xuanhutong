@@ -100,30 +100,30 @@ async function exportPdf() {
       <NDataTable :columns="rxColumns" :data="prescriptions" :pagination="false" />
     </NCard>
 
-    <NModal v-model:show="showRecordModal" title="添加就诊记录">
-      <div style="padding: 20px;">
-        <NForm label-placement="left" label-width="80">
-          <NFormItem label="就诊日期" required>
-            <NDatePicker v-model:value="recordForm.visitDate" type="datetime" />
-          </NFormItem>
-          <NFormItem label="症状">
-            <NInput v-model:value="recordForm.symptoms" type="textarea" placeholder="请输入症状" />
-          </NFormItem>
-          <NFormItem label="诊断">
-            <NInput v-model:value="recordForm.diagnosis" type="textarea" placeholder="请输入诊断" />
-          </NFormItem>
-          <NFormItem label="治法">
-            <NInput v-model:value="recordForm.treatmentMethod" type="textarea" placeholder="请输入治疗方法" />
-          </NFormItem>
-          <NFormItem label="备注">
-            <NInput v-model:value="recordForm.notes" type="textarea" />
-          </NFormItem>
-        </NForm>
-        <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 16px;">
+    <NModal v-model:show="showRecordModal" title="添加就诊记录" preset="card" style="width:520px;" title-style="font-size:18px;font-weight:600;">
+      <NForm label-placement="left" label-width="80">
+        <NFormItem label="就诊日期" required>
+          <NDatePicker v-model:value="recordForm.visitDate" type="datetime" />
+        </NFormItem>
+        <NFormItem label="症状">
+          <NInput v-model:value="recordForm.symptoms" type="textarea" placeholder="请输入症状" />
+        </NFormItem>
+        <NFormItem label="诊断">
+          <NInput v-model:value="recordForm.diagnosis" type="textarea" placeholder="请输入诊断" />
+        </NFormItem>
+        <NFormItem label="治法">
+          <NInput v-model:value="recordForm.treatmentMethod" type="textarea" placeholder="请输入治疗方法" />
+        </NFormItem>
+        <NFormItem label="备注">
+          <NInput v-model:value="recordForm.notes" type="textarea" />
+        </NFormItem>
+      </NForm>
+      <template #footer>
+        <NSpace justify="end">
           <NButton @click="showRecordModal = false">取消</NButton>
           <NButton type="primary" @click="createRecord">保存</NButton>
-        </div>
-      </div>
+        </NSpace>
+      </template>
     </NModal>
   </div>
 </template>

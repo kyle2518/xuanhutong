@@ -28,8 +28,11 @@ async function sign() {
     const a = document.createElement('a'); a.href = url; a.download = 'prescription_signed.pdf'; a.click()
     URL.revokeObjectURL(url)
     showSignModal.value = false
+    // Reload detail to update isSigned status
+    const updated = await prescriptionApi.get(Number(route.params.id))
+    detail.value = updated.data.data?.prescription || {}
     message.success('签署成功')
-  } catch (e: any) { message.error('签署失败') }
+  } catch (e: any) { message.error(e.response?.data?.message || '签署失败') }
 }
 
 async function preview() {
@@ -72,15 +75,15 @@ const columns: any = [
       <NDataTable :columns="columns" :data="items" :pagination="false" />
     </NCard>
 
-    <NModal v-model:show="showSignModal" title="签署药方">
-      <div style="padding: 20px;">
-        <p>请输入医师签名：</p>
-        <NInput v-model:value="signature" placeholder="请输入您的签名" style="margin-bottom: 12px;" />
-        <div style="display: flex; justify-content: flex-end; gap: 12px;">
+    <NModal v-model:show="showSignModal" title="签署药方" preset="card" style="width:420px;" title-style="font-size:18px;font-weight:600;">
+      <p style="margin-bottom:12px;">请输入医师签名：</p>
+      <NInput v-model:value="signature" placeholder="请输入您的签名" style="margin-bottom: 16px;" />
+      <template #footer>
+        <NSpace justify="end">
           <NButton @click="showSignModal = false">取消</NButton>
           <NButton type="primary" @click="sign">确认签署</NButton>
-        </div>
-      </div>
+        </NSpace>
+      </template>
     </NModal>
   </div>
 </template>

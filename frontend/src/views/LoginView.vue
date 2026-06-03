@@ -18,6 +18,7 @@ const isRegister = ref(false)
 const codeSent = ref(false)
 const loading = ref(false)
 const countdown = ref(0)
+const errorMsg = ref('')
 
 async function sendCode() {
   if (!phone.value || phone.value.length !== 11) {
@@ -50,10 +51,11 @@ async function handleSubmit() {
     message.warning('请输入姓名')
     return
   }
+  errorMsg.value = ''
   loading.value = true
   try {
     if (isRegister.value) {
-      if (!code.value) { message.warning('请输入验证码'); return }
+      if (!code.value) { errorMsg.value = '请输入验证码'; return }
       await auth.register({
         phone: phone.value,
         code: code.value,
@@ -63,20 +65,18 @@ async function handleSubmit() {
       })
       message.success('注册成功，欢迎加入悬壶通！')
     } else {
-      // Login: SMS or password
       if (activeTab.value === 'sms') {
-        if (!code.value) { message.warning('请输入验证码'); return }
+        if (!code.value) { errorMsg.value = '请输入验证码'; return }
         await auth.login(phone.value, code.value)
       } else {
-        if (!password.value) { message.warning('请输入密码'); return }
+        if (!password.value) { errorMsg.value = '请输入密码'; return }
         await auth.login(phone.value, undefined, password.value)
       }
       message.success('登录成功')
     }
     router.push('/')
   } catch (e: any) {
-    const msg = e.response?.data?.message || '操作失败，请重试'
-    message.error(msg)
+    errorMsg.value = e.response?.data?.message || '操作失败，请重试'
   } finally {
     loading.value = false
   }
@@ -141,7 +141,7 @@ const submitLabel = computed(() => {
           </div>
 
           <!-- Login type tabs (only for login) -->
-          <NTabs v-if="!isRegister" v-model:value="activeTab" type="line" animated>
+          <NTabs v-if="!isRegister" v-model:value="activeTab" type="line" animated @update:value="errorMsg = ''">
             <NTabPane name="sms" tab="验证码登录" />
             <NTabPane name="password" tab="密码登录" />
           </NTabs>
@@ -179,6 +179,9 @@ const submitLabel = computed(() => {
             </NFormItem>
           </NForm>
 
+          <!-- Inline error display -->
+          <div v-if="errorMsg" class="error-msg">{{ errorMsg }}</div>
+
           <NButton type="primary" size="large" block :loading="loading" @click="handleSubmit" class="submit-btn">
             {{ submitLabel }}
           </NButton>
@@ -189,7 +192,7 @@ const submitLabel = computed(() => {
             </span>
           </NDivider>
 
-          <NButton text type="primary" size="large" @click="isRegister = !isRegister" style="width: 100%;">
+          <NButton text type="primary" size="large" @click="isRegister = !isRegister; errorMsg = ''" style="width: 100%;">
             {{ isRegister ? '去登录' : '创建新账号' }}
           </NButton>
         </div>
@@ -361,6 +364,16 @@ const submitLabel = computed(() => {
   background: linear-gradient(135deg, #14532d, #166534) !important;
   transform: translateY(-1px);
   box-shadow: 0 4px 15px rgba(22,101,52,0.4);
+}
+.error-msg {
+  color: #d03050;
+  font-size: 13px;
+  background: rgba(208,48,80,0.06);
+  border: 1px solid rgba(208,48,80,0.2);
+  border-radius: 8px;
+  padding: 8px 12px;
+  margin-bottom: 12px;
+  text-align: center;
 }
 
 /* Mobile responsive */

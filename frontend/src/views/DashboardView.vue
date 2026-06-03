@@ -51,9 +51,9 @@ function getStatusLabel(s: string) { return { PENDING: '待确认', CONFIRMED: '
 
     <!-- Stats Row -->
     <NGrid :cols="3" :x-gap="20" responsive="screen" style="margin-bottom: 24px;">
-      <NGridItem><NCard class="stat-card"><div class="stat-row"><div class="stat-icon" style="background:rgba(16,185,129,0.12);color:#10b981;">👤</div><div class="stat-body"><NStatistic label="病人总数" :value="patientCount" /></div></div></NCard></NGridItem>
-      <NGridItem><NCard class="stat-card"><div class="stat-row"><div class="stat-icon" style="background:rgba(245,158,11,0.12);color:#f59e0b;">📅</div><div class="stat-body"><NStatistic label="待确认预约" :value="pendingAppointments" /></div></div></NCard></NGridItem>
-      <NGridItem><NCard class="stat-card" :style="lowStockCount > 0 ? 'border-left:3px solid #ef4444;' : ''"><div class="stat-row"><div class="stat-icon" style="background:rgba(239,68,68,0.12);color:#ef4444;">⚠️</div><div class="stat-body"><NStatistic label="低库存预警" :value="lowStockCount" /></div></div></NCard></NGridItem>
+      <NGridItem><NCard class="stat-card clickable" hoverable @click="router.push('/patients')"><div class="stat-row"><div class="stat-icon" style="background:rgba(16,185,129,0.12);color:#10b981;">👤</div><div class="stat-body"><NStatistic label="病人总数" :value="patientCount" /></div></div></NCard></NGridItem>
+      <NGridItem><NCard class="stat-card clickable" hoverable @click="router.push('/appointments')"><div class="stat-row"><div class="stat-icon" style="background:rgba(245,158,11,0.12);color:#f59e0b;">📅</div><div class="stat-body"><NStatistic label="待确认预约" :value="pendingAppointments" /></div></div></NCard></NGridItem>
+      <NGridItem><NCard class="stat-card clickable" hoverable @click="router.push('/inventory')" :style="lowStockCount > 0 ? 'border-left:3px solid #ef4444;' : ''"><div class="stat-row"><div class="stat-icon" style="background:rgba(239,68,68,0.12);color:#ef4444;">⚠️</div><div class="stat-body"><NStatistic label="低库存预警" :value="lowStockCount" /></div></div></NCard></NGridItem>
     </NGrid>
 
     <!-- Shortcuts -->
@@ -94,6 +94,7 @@ function getStatusLabel(s: string) { return { PENDING: '待确认', CONFIRMED: '
 .welcome-banner p { margin: 0; opacity: 0.75; font-size: 14px; }
 .section-title { font-size: 16px; font-weight: 600; color: #333; margin: 0 0 12px; }
 .stat-card { border-radius: 12px; }
+.clickable { cursor: pointer; }
 .stat-row { display: flex; align-items: center; gap: 16px; }
 .stat-icon { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
 .stat-body { flex: 1; }
