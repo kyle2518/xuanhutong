@@ -1,0 +1,11 @@
+plugins { id 'org.springframework.boot' }
+dependencies {
+    implementation project(':common')
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    runtimeOnly 'com.mysql:mysql-connector-j'
+    implementation 'org.flywaydb:flyway-core'; implementation 'org.flywaydb:flyway-mysql'
+    implementation 'com.itextpdf:kernel:8.0.3'; implementation 'com.itextpdf:layout:8.0.3'
+    implementation 'com.itextpdf:io:8.0.3'; implementation 'com.itextpdf:font-asian:8.0.3'
+}

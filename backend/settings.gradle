@@ -1,0 +1,8 @@
+rootProject.name = 'xuanhutong'
+
+include 'common'
+include 'gateway'
+include 'auth-service'
+include 'medical-service'
+include 'clinic-service'
+include 'prescription-service'
