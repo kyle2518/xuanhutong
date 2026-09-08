@@ -5,4 +5,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication(scanBasePackages = {"com.xuanhutong"})
 @MapperScan("com.xuanhutong.rx.repository")
-public class RxServiceApplication { public static void main(String[] args) { SpringApplication.run(RxServiceApplication.class, args); } }
+public class RxServiceApplication {
+    public static void main(String[] args) {
+        SpringApplication.run(RxServiceApplication.class, args);
+    }
+}
