@@ -1,0 +1,39 @@
+name: Build & Deploy (Self-hosted)
+
+# ⚠️ 公共仓库安全铁律：只允许 push 到 main 触发。
+#    绝不要加 pull_request / pull_request_target，
+#    否则 fork 的 PR 会在你的 runner 上执行任意代码。
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# 同一时间只跑一次，避免并发部署互相踩
+concurrency:
+  group: prod-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 生成 .env（密钥来自 GitHub Secrets，不落盘到仓库）
+        env:
+          DB_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
+          JWT: ${{ secrets.JWT_SECRET }}
+          APP_HOST: ${{ vars.APP_HOST }}
+        run: |
+          printf 'MYSQL_ROOT_PASSWORD=%s\n' "$DB_PASSWORD" > .env
+          printf 'MYSQL_DATABASE=xuanhutong\n'       >> .env
+          printf 'JWT_SECRET=%s\n' "$JWT"            >> .env
+          printf 'APP_BASE_URL=http://%s\n' "$APP_HOST" >> .env
+
+      - name: 构建镜像
+        run: docker compose build
+
+      - name: 滚动更新
+        run: |
+          docker compose up -d --remove-orphans
+          docker image prune -f
