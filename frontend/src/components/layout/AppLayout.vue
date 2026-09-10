@@ -22,6 +22,7 @@ const menuOptions: MenuOption[] = [
   { label: () => renderLabel('📦', '药材库存'), key: '/inventory' },
   { label: () => renderLabel('📅', '预约管理'), key: '/appointments' },
   { label: () => renderLabel('📜', '经典药方'), key: '/classics' },
+  { label: () => renderLabel('📚', '知识库'), key: '/rag' },
 ];
 
 const activeKey = computed(() => {
@@ -31,6 +32,7 @@ const activeKey = computed(() => {
   if (path.startsWith('/inventory')) return '/inventory'
   if (path.startsWith('/appointments')) return '/appointments'
   if (path.startsWith('/classics')) return '/classics'
+  if (path.startsWith('/rag')) return '/rag'
   return '/'
 })
 

@@ -29,6 +29,8 @@ const routes = [
       { path: 'appointments', name: 'Appointments', component: () => import('@/views/appointments/AppointmentListView.vue') },
       { path: 'appointments/qr', name: 'AppointmentQR', component: () => import('@/views/appointments/AppointmentQRView.vue') },
       { path: 'classics', name: 'ClassicPrescriptions', component: () => import('@/views/classics/ClassicPrescriptionListView.vue') },
+      { path: 'rag', name: 'RagKnowledgeBases', component: () => import('@/views/rag/RagKnowledgeBasesView.vue') },
+      { path: 'rag/knowledge-bases/:id', name: 'RagKnowledgeBaseDetail', component: () => import('@/views/rag/RagKnowledgeBaseDetailView.vue') },
     ]
   },
   { path: '/:pathMatch(.*)*', redirect: '/' }

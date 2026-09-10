@@ -23,6 +23,10 @@ spring:
           uri: ${PRESCRIPTION_SERVICE_URI:http://localhost:8084}
           predicates:
             - Path=/api/prescriptions/**,/api/herbs/**,/api/classic-prescriptions/**
+        - id: rag-service
+          uri: ${RAG_SERVICE_URI:http://localhost:8000}
+          predicates:
+            - Path=/api/rag/**
       default-filters:
         - DedupeResponseHeader=Access-Control-Allow-Origin
   main:
