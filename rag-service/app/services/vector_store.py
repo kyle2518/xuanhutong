@@ -1,24 +1,39 @@
 from langchain_core.documents import Document
+from langchain_core.embeddings import Embeddings
 from langchain_milvus import Milvus
-from langchain_openai import OpenAIEmbeddings
 from pymilvus import MilvusClient
+from shared.embedding import DashScopeEmbedder
 
 from ..config import Settings
+
+
+class DashScopeEmbeddings(Embeddings):
+    """把共享层的 DashScopeEmbedder 适配为 LangChain Embeddings 接口。"""
+
+    def __init__(self, embedder: DashScopeEmbedder):
+        self._embedder = embedder
+
+    def embed_documents(self, texts: list[str]) -> list[list[float]]:
+        return self._embedder.embed_documents(texts)
+
+    def embed_query(self, text: str) -> list[float]:
+        return self._embedder.embed_query(text)
 
 
 class VectorStoreProvider:
     def __init__(self, settings: Settings):
         self._settings = settings
-        self._embeddings: OpenAIEmbeddings | None = None
+        self._embeddings: Embeddings | None = None
 
-    def _embedding(self) -> OpenAIEmbeddings:
+    def _embedding(self) -> Embeddings:
         if self._embeddings is None:
-            self._embeddings = OpenAIEmbeddings(
-                model=self._settings.embedding_model,
-                base_url=self._settings.embedding_base_url
-                or self._settings.llm_base_url,
-                api_key=self._settings.embedding_api_key or None,
-                check_embedding_ctx_length=False,
+            self._embeddings = DashScopeEmbeddings(
+                DashScopeEmbedder(
+                    base_url=self._settings.embedding_base_url
+                    or self._settings.llm_base_url,
+                    api_key=self._settings.embedding_api_key or "",
+                    model=self._settings.embedding_model,
+                )
             )
         return self._embeddings
 

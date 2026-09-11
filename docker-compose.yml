@@ -200,6 +200,8 @@ services:
     build:
       context: ./ai-service
       dockerfile: Dockerfile
+      additional_contexts:
+        shared: ./shared
     restart: unless-stopped
     environment:
       DB_HOST: mysql
@@ -227,6 +229,8 @@ services:
     build:
       context: ./rag-service
       dockerfile: Dockerfile
+      additional_contexts:
+        shared: ./shared
     restart: unless-stopped
     environment:
       RAG_MILVUS_URI: http://milvus:19530
