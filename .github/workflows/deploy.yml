@@ -18,6 +18,8 @@ jobs:
     runs-on: self-hosted
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: 生成 .env（密钥来自 GitHub Secrets，不落盘到仓库）
         env:
@@ -34,8 +36,37 @@ jobs:
           printf 'DEEPSEEK_API_KEY=%s\n' "$DEEPSEEK_API_KEY" >> .env
           printf 'EMBEDDING_API_KEY=%s\n' "$EMBEDDING_API_KEY" >> .env
 
+      - name: 检测变更的服务
+        id: changed
+        env:
+          BEFORE: ${{ github.event.before }}
+        run: |
+          if [ -z "$BEFORE" ] || [ "$BEFORE" = "0000000000000000000000000000000000000000" ]; then
+            CHANGED=$(git diff --name-only HEAD~1 HEAD 2>/dev/null || echo "")
+          else
+            CHANGED=$(git diff --name-only "$BEFORE" HEAD 2>/dev/null || echo "")
+          fi
+          SERVICES=""
+          # Java 后端（common 被所有 Java 服务依赖，共用一个 Dockerfile）
+          if echo "$CHANGED" | grep -q '^backend/'; then
+            SERVICES="$SERVICES gateway auth-service medical-service clinic-service prescription-service"
+          fi
+          # shared 被 ai-service 和 rag-service 共同依赖
+          if echo "$CHANGED" | grep -qE '^(ai-service/|shared/)'; then
+            SERVICES="$SERVICES ai-service rag-service"
+          fi
+          if echo "$CHANGED" | grep -q '^frontend/'; then
+            SERVICES="$SERVICES frontend"
+          fi
+          # 未检测到变更（首次/手动）则全量构建
+          if [ -z "$SERVICES" ]; then
+            SERVICES="gateway auth-service medical-service clinic-service prescription-service ai-service rag-service frontend"
+          fi
+          echo "检测到变更，构建服务：$SERVICES"
+          echo "services=$SERVICES" >> "$GITHUB_OUTPUT"
+
       - name: 构建镜像
-        run: docker compose build
+        run: docker compose build ${{ steps.changed.outputs.services }}
 
       - name: 滚动更新
         run: |

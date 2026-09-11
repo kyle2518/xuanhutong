@@ -5,8 +5,8 @@ ENV TZ=Asia/Shanghai PYTHONUNBUFFERED=1
 
 # 先拷依赖清单，利用 Docker 层缓存
 COPY requirements.txt ./
-RUN pip install --no-cache-dir --upgrade pip -i https://pypi.tuna.tsinghua.edu.cn/simple \
-    && pip install --no-cache-dir -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
+RUN --mount=type=cache,target=/root/.cache/pip pip install --upgrade pip -i https://pypi.tuna.tsinghua.edu.cn/simple \
+    && pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
 
 COPY --from=shared . ./shared
 COPY app ./app

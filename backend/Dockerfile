@@ -13,8 +13,8 @@ COPY medical-service/build.gradle ./medical-service/
 COPY clinic-service/build.gradle ./clinic-service/
 COPY prescription-service/build.gradle ./prescription-service/
 
-# 预下载依赖（结果写入本层，Docker 层缓存会自动复用）
-RUN gradle dependencies --no-daemon || true
+# 预下载依赖（cache mount 持久化 Gradle 依赖，跨构建复用）
+RUN --mount=type=cache,target=/root/.gradle gradle dependencies --no-daemon
 
 # 再拷贝全部源码
 COPY common ./common
@@ -25,8 +25,9 @@ COPY clinic-service ./clinic-service
 COPY prescription-service ./prescription-service
 
 # 构建指定服务（SERVICE_NAME 由 docker compose 传入）
+# cache mount + build cache 实现增量编译：源码变更时只编译变更模块
 ARG SERVICE_NAME
-RUN gradle :${SERVICE_NAME}:bootJar --no-daemon -x test
+RUN --mount=type=cache,target=/root/.gradle gradle :${SERVICE_NAME}:bootJar --no-daemon --build-cache -x test
 
 # ---------- 运行阶段 ----------
 FROM eclipse-temurin:21-jre
