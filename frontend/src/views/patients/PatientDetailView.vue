@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { NCard, NButton, NDescriptions, NDescriptionsItem, NDataTable, NSpace, NModal, NForm, NFormItem, NInput, NDatePicker, useMessage } from 'naive-ui'
+import { NCard, NButton, NDescriptions, NDescriptionsItem, NDataTable, NSpace, NModal, NForm, NFormItem, NInput, NDatePicker, NSelect, useMessage } from 'naive-ui'
 import { patientApi } from '@/api/patients'
 import { recordApi } from '@/api/medicalRecords'
 import { prescriptionApi } from '@/api/prescriptions'
@@ -16,7 +16,19 @@ const records = ref([])
 const prescriptions = ref([])
 
 const showRecordModal = ref(false)
-const recordForm = ref({ visitDate: Date.now(), diagnosis: '', symptoms: '', treatmentMethod: '', notes: '' })
+const recordForm = ref({ visitDate: Date.now(), diagnosis: '', symptoms: '', treatmentMethod: '', progress: null as string | null, notes: '' })
+
+const progressOptions = [
+  { label: '好转', value: '好转' },
+  { label: '加重', value: '加重' },
+  { label: '平稳', value: '平稳' },
+]
+
+const recordMap = computed(() => {
+  const map: Record<number, any> = {}
+  for (const r of records.value) map[r.id] = r
+  return map
+})
 
 onMounted(async () => {
   const id = Number(route.params.id)
@@ -36,9 +48,21 @@ const recordColumns: any = [
   { title: '就诊日期', key: 'visitDate', render: (row: any) => row.visitDate ? new Date(row.visitDate).toLocaleString() : '-' },
   { title: '诊断', key: 'diagnosis', render: (row: any) => row.diagnosis || '-', ellipsis: { tooltip: true } },
   { title: '治法', key: 'treatmentMethod', render: (row: any) => row.treatmentMethod || '-' },
+  { title: '转归', key: 'progress', render: (row: any) => row.progress || '-' },
+  {
+    title: '操作', key: 'action',
+    render: (row: any) => h(NButton, { size: 'small', onClick: () => router.push(`/prescriptions/new/${patient.value.id}?recordId=${row.id}`) }, { default: () => '开方' }),
+  },
 ]
 
 const rxColumns: any = [
+  {
+    title: '关联就诊', key: 'medicalRecordId',
+    render: (row: any) => {
+      const rec = row.medicalRecordId ? recordMap.value[row.medicalRecordId] : null
+      return rec ? new Date(rec.visitDate).toLocaleDateString() : '未关联'
+    },
+  },
   { title: '诊断', key: 'diagnosis', render: (row: any) => row.diagnosis || '-' },
   { title: '剂数', key: 'totalDoses' },
   { title: '签名状态', key: 'isSigned', render: (row: any) => row.isSigned ? '已签' : '未签' },
@@ -113,6 +137,9 @@ async function exportPdf() {
         </NFormItem>
         <NFormItem label="治法">
           <NInput v-model:value="recordForm.treatmentMethod" type="textarea" placeholder="请输入治疗方法" />
+        </NFormItem>
+        <NFormItem label="转归">
+          <NSelect v-model:value="recordForm.progress" :options="progressOptions" placeholder="请选择病情变化" clearable />
         </NFormItem>
         <NFormItem label="备注">
           <NInput v-model:value="recordForm.notes" type="textarea" />

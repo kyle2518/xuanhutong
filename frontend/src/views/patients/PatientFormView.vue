@@ -29,8 +29,12 @@ onMounted(async () => {
 })
 
 async function submit() {
-  if (!form.value.name || !form.value.phone) {
-    message.warning('请填写姓名和手机号')
+  if (!form.value.name) {
+    message.warning('请填写姓名')
+    return
+  }
+  if (!/^1\d{10}$/.test(form.value.phone)) {
+    message.warning('请输入正确的手机号（11位数字）')
     return
   }
   loading.value = true

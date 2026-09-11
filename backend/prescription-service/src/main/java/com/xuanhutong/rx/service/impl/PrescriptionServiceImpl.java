@@ -14,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.*;
 
 @Slf4j
@@ -26,18 +27,49 @@ public class PrescriptionServiceImpl implements PrescriptionService {
     private final HerbInventoryRepository inventoryRepo;
     private final PatientRepository patientRepo;
 
-    public Page<Prescription> listPrescriptions(Long patientId, Long userId, int page, int size) {
+    public Page<Prescription> listPrescriptions(Long patientId, String keyword, String startDate, String endDate, Long userId, int page, int size) {
         var w = new LambdaQueryWrapper<Prescription>().eq(Prescription::getUserId, userId);
         if (patientId != null) w.eq(Prescription::getPatientId, patientId);
-        w.orderByDesc(Prescription::getCreatedAt); return rxRepo.selectPage(new Page<>(page, size), w);
+        if (keyword != null && !keyword.isBlank()) {
+            var pids = patientRepo.selectList(new LambdaQueryWrapper<Patient>()
+                    .eq(Patient::getUserId, userId)
+                    .and(q -> q.like(Patient::getName, keyword).or().like(Patient::getPhone, keyword)))
+                    .stream().map(Patient::getId).toList();
+            if (pids.isEmpty()) {
+                Page<Prescription> empty = new Page<>(page, size);
+                empty.setRecords(new ArrayList<>()); empty.setTotal(0);
+                return empty;
+            }
+            w.in(Prescription::getPatientId, pids);
+        }
+        if (startDate != null && !startDate.isBlank()) w.ge(Prescription::getCreatedAt, LocalDate.parse(startDate).atStartOfDay());
+        if (endDate != null && !endDate.isBlank()) w.le(Prescription::getCreatedAt, LocalDate.parse(endDate).plusDays(1).atStartOfDay());
+        w.orderByDesc(Prescription::getCreatedAt);
+        Page<Prescription> result = rxRepo.selectPage(new Page<>(page, size), w);
+        fillPatientInfo(result.getRecords());
+        return result;
+    }
+
+    private void fillPatientInfo(List<Prescription> rxs) {
+        if (rxs == null || rxs.isEmpty()) return;
+        var ids = rxs.stream().map(Prescription::getPatientId).filter(Objects::nonNull).distinct().toList();
+        if (ids.isEmpty()) return;
+        Map<Long, Patient> map = new HashMap<>();
+        for (var p : patientRepo.selectBatchIds(ids)) map.put(p.getId(), p);
+        for (var rx : rxs) {
+            Patient p = map.get(rx.getPatientId());
+            if (p != null) { rx.setPatientName(p.getName()); rx.setPatientPhone(p.getPhone()); }
+        }
     }
 
     public Map<String, Object> getPrescriptionDetail(Long id, Long userId) {
         var rx = rxRepo.selectOne(new LambdaQueryWrapper<Prescription>().eq(Prescription::getId, id).eq(Prescription::getUserId, userId));
         if (rx == null) throw new BusinessException(ErrorCode.PRESCRIPTION_NOT_FOUND);
         var items = itemRepo.selectList(new LambdaQueryWrapper<PrescriptionItem>().eq(PrescriptionItem::getPrescriptionId, id).orderByAsc(PrescriptionItem::getSortOrder));
-        String patientName = getPatientName(rx.getPatientId());
-        Map<String, Object> m = new HashMap<>(); m.put("prescription", rx); m.put("items", items); m.put("patientName", patientName); return m;
+        Patient patient = rx.getPatientId() != null ? patientRepo.selectById(rx.getPatientId()) : null;
+        String patientName = patient != null ? patient.getName() : "未知";
+        String patientPhone = patient != null ? patient.getPhone() : null;
+        Map<String, Object> m = new HashMap<>(); m.put("prescription", rx); m.put("items", items); m.put("patientName", patientName); m.put("patientPhone", patientPhone); return m;
     }
 
     @Transactional

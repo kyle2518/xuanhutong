@@ -50,12 +50,12 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
         MedicalRecord r = new MedicalRecord(); r.setPatientId(patientId); r.setUserId(userId);
         r.setVisitDate(req.getVisitDate()); r.setDiagnosis(req.getDiagnosis());
         r.setSymptoms(req.getSymptoms()); r.setTreatmentMethod(req.getTreatmentMethod());
-        r.setNotes(req.getNotes()); recordRepository.insert(r); return r;
+        r.setProgress(req.getProgress()); r.setNotes(req.getNotes()); recordRepository.insert(r); return r;
     }
     public MedicalRecord updateRecord(Long id, Long userId, MedicalRecordRequest req) {
         MedicalRecord r = getRecord(id, userId);
         r.setVisitDate(req.getVisitDate()); r.setDiagnosis(req.getDiagnosis()); r.setSymptoms(req.getSymptoms());
-        r.setTreatmentMethod(req.getTreatmentMethod()); r.setNotes(req.getNotes());
+        r.setTreatmentMethod(req.getTreatmentMethod()); r.setProgress(req.getProgress()); r.setNotes(req.getNotes());
         recordRepository.updateById(r); return r;
     }
     public void deleteRecord(Long id, Long userId) { getRecord(id, userId); recordRepository.deleteById(id); }

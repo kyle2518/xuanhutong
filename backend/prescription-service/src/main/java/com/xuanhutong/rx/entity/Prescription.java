@@ -10,6 +10,8 @@ public class Prescription {
     private String diagnosis; private String notes; private Integer totalDoses;
     private String pdfUrl; private Integer isSigned; private LocalDateTime signedAt;
     private String signatureText;
+    @TableField(exist = false) private String patientName;
+    @TableField(exist = false) private String patientPhone;
     @TableLogic private Integer isDeleted;
     @TableField(fill = FieldFill.INSERT) private LocalDateTime createdAt;
     @TableField(fill = FieldFill.INSERT_UPDATE) private LocalDateTime updatedAt;

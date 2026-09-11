@@ -24,11 +24,15 @@ jobs:
           DB_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
           JWT: ${{ secrets.JWT_SECRET }}
           APP_HOST: ${{ vars.APP_HOST }}
+          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+          EMBEDDING_API_KEY: ${{ secrets.EMBEDDING_API_KEY }}
         run: |
           printf 'MYSQL_ROOT_PASSWORD=%s\n' "$DB_PASSWORD" > .env
           printf 'MYSQL_DATABASE=xuanhutong\n'       >> .env
           printf 'JWT_SECRET=%s\n' "$JWT"            >> .env
           printf 'APP_BASE_URL=http://%s\n' "$APP_HOST" >> .env
+          printf 'DEEPSEEK_API_KEY=%s\n' "$DEEPSEEK_API_KEY" >> .env
+          printf 'EMBEDDING_API_KEY=%s\n' "$EMBEDDING_API_KEY" >> .env
 
       - name: 构建镜像
         run: docker compose build

@@ -6,5 +6,5 @@ import java.time.LocalDateTime;
 @Data
 public class MedicalRecordRequest {
     @NotNull(message = "就诊日期不能为空") private LocalDateTime visitDate;
-    private String diagnosis; private String symptoms; private String treatmentMethod; private String notes;
+    private String diagnosis; private String symptoms; private String treatmentMethod; private String progress; private String notes;
 }

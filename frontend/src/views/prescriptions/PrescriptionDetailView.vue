@@ -11,12 +11,16 @@ const detail = ref<any>({})
 const items = ref([])
 const showSignModal = ref(false)
 const signature = ref('')
+const patientName = ref('')
+const patientPhone = ref('')
 
 onMounted(async () => {
   try {
     const res = await prescriptionApi.get(Number(route.params.id))
     detail.value = res.data.data?.prescription || {}
     items.value = res.data.data?.items || []
+    patientName.value = res.data.data?.patientName || ''
+    patientPhone.value = res.data.data?.patientPhone || ''
   } catch { message.error('加载失败') }
 })
 
@@ -62,6 +66,9 @@ const columns: any = [
         </NSpace>
       </template>
       <NDescriptions :column="3">
+        <NDescriptionsItem label="病人名称">{{ patientName || '-' }}</NDescriptionsItem>
+        <NDescriptionsItem label="手机号">{{ patientPhone || '-' }}</NDescriptionsItem>
+        <NDescriptionsItem label="创建时间">{{ detail.createdAt ? new Date(detail.createdAt).toLocaleString() : '-' }}</NDescriptionsItem>
         <NDescriptionsItem label="诊断">{{ detail.diagnosis || '-' }}</NDescriptionsItem>
         <NDescriptionsItem label="剂数">{{ detail.totalDoses || '-' }}</NDescriptionsItem>
         <NDescriptionsItem label="签名状态">{{ detail.isSigned ? '已签' : '未签' }}</NDescriptionsItem>

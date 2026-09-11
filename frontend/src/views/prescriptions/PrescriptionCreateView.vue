@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, h } from 'vue'
+import { ref, computed, onMounted, watch, h } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { NCard, NButton, NInput, NInputNumber, NDataTable, NSelect, NSpace, NPopover, NModal, NTag, useMessage, NForm, NFormItem, NDivider, NDescriptions, NDescriptionsItem } from 'naive-ui'
 import { prescriptionApi } from '@/api/prescriptions'
 import { herbApi } from '@/api/herbs'
 import { patientApi } from '@/api/patients'
 import { classicApi } from '@/api/classicPrescriptions'
+import { recordApi } from '@/api/medicalRecords'
 
 const router = useRouter()
 const route = useRoute()
@@ -15,6 +16,8 @@ const message = useMessage()
 const patientId = ref(route.params.patientId ? Number(route.params.patientId) : null as number | null)
 const patients = ref([])
 const patientSearchLoading = ref(false)
+const recordId = ref(route.query.recordId ? Number(route.query.recordId) : null)
+const recordOptions = ref<any[]>([])
 
 // Herb items
 interface RxItem {
@@ -41,7 +44,6 @@ const classicList = ref<any[]>([])
 const pdfLoading = ref(false)
 const showPdfPreview = ref(false)
 const pdfUrl = ref('')
-const signatureInput = ref('')
 
 // Patient search
 async function searchPatients(keyword: string) {
@@ -52,6 +54,21 @@ async function searchPatients(keyword: string) {
     patients.value = (res.data.data?.records || []).map((p: any) => ({ label: `${p.name} (${p.phone})`, value: p.id }))
   } finally { patientSearchLoading.value = false }
 }
+
+async function loadRecords(pid: number) {
+  try {
+    const res = await recordApi.list(pid, { page: 1, size: 50 })
+    recordOptions.value = (res.data.data?.records || []).map((r: any) => ({
+      label: `${new Date(r.visitDate).toLocaleDateString()} · ${r.diagnosis || '未诊断'}`,
+      value: r.id
+    }))
+  } catch { recordOptions.value = [] }
+}
+
+watch(patientId, (v) => {
+  if (v) loadRecords(v)
+  else recordOptions.value = []
+}, { immediate: true })
 
 // Herb search
 async function searchHerbs(keyword: string, index: number) {
@@ -140,7 +157,7 @@ async function previewPdf() {
   pdfLoading.value = true
   try {
     const requestData = {
-      patientId: patientId.value, diagnosis: diagnosis.value,
+      patientId: patientId.value, medicalRecordId: recordId.value || undefined, diagnosis: diagnosis.value,
       notes: rxNotes.value, totalDoses: totalDoses.value,
       items: items.value.map(i => ({ herbId: i.herbId, herbName: i.herbName, dosageGrams: i.dosageGrams, notes: i.notes }))
     }
@@ -157,7 +174,7 @@ async function savePrescription() {
   pdfLoading.value = true
   try {
     const requestData = {
-      patientId: patientId.value, diagnosis: diagnosis.value,
+      patientId: patientId.value, medicalRecordId: recordId.value || undefined, diagnosis: diagnosis.value,
       notes: rxNotes.value, totalDoses: totalDoses.value,
       items: items.value.map(i => ({ herbId: i.herbId, herbName: i.herbName, dosageGrams: i.dosageGrams, notes: i.notes }))
     }
@@ -166,19 +183,6 @@ async function savePrescription() {
     router.push(`/prescriptions/${res.data.data.id}`)
   } catch (e: any) { message.error(e.response?.data?.message || '保存失败') }
   finally { pdfLoading.value = false }
-}
-
-// Sign
-async function signPrescription(prescriptionId: number) {
-  if (!signatureInput.value) { message.warning('请签署姓名'); return }
-  try {
-    const res = await prescriptionApi.sign(prescriptionId, signatureInput.value)
-    const url = URL.createObjectURL(res.data)
-    const a = document.createElement('a')
-    a.href = url; a.download = 'prescription_signed.pdf'; a.click()
-    URL.revokeObjectURL(url)
-    message.success('签署成功')
-  } catch (e: any) { message.error('签署失败') }
 }
 </script>
 
@@ -192,6 +196,9 @@ async function signPrescription(prescriptionId: number) {
         <NFormItem label="病人">
           <NSelect v-model:value="patientId" :options="patients" filterable remote clearable placeholder="输入姓名或电话搜索病人"
             @search="searchPatients" :loading="patientSearchLoading" />
+        </NFormItem>
+        <NFormItem label="关联就诊">
+          <NSelect v-model:value="recordId" :options="recordOptions" clearable placeholder="选择本次开方对应的就诊记录（可选）" />
         </NFormItem>
       </NForm>
     </NCard>
@@ -258,11 +265,7 @@ async function signPrescription(prescriptionId: number) {
         <iframe v-if="pdfUrl" :src="pdfUrl" width="100%" height="480px" frameborder="0" style="border:1px solid #eee;border-radius:6px;"></iframe>
       </div>
       <template #footer>
-        <div style="display:flex;justify-content:space-between;align-items:center;width:100%;">
-          <NSpace>
-            <NInput v-model:value="signatureInput" placeholder="请输入医师签名" style="width:180px;" />
-            <NButton type="primary" @click="() => signPrescription(0)">签署并下载</NButton>
-          </NSpace>
+        <div style="display:flex;justify-content:flex-end;width:100%;">
           <NButton @click="showPdfPreview = false">关闭</NButton>
         </div>
       </template>

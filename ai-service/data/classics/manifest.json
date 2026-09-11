@@ -1,0 +1,16 @@
+[
+  {
+    "id": "shanghanlun",
+    "title": "伤寒论",
+    "file": "shanghanlun.json",
+    "source": "东汉·张仲景",
+    "license": "public-domain"
+  },
+  {
+    "id": "jinguiyaolue",
+    "title": "金匮要略",
+    "file": "jinguiyaolue.json",
+    "source": "东汉·张仲景",
+    "license": "public-domain"
+  }
+]

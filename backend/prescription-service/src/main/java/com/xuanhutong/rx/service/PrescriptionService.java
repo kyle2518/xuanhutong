@@ -5,7 +5,7 @@ import com.xuanhutong.rx.entity.Prescription;
 import java.util.Map;
 
 public interface PrescriptionService {
-    Page<Prescription> listPrescriptions(Long patientId, Long userId, int page, int size);
+    Page<Prescription> listPrescriptions(Long patientId, String keyword, String startDate, String endDate, Long userId, int page, int size);
     Map<String, Object> getPrescriptionDetail(Long id, Long userId);
     Prescription createPrescription(Long userId, PrescriptionCreateRequest request);
     Prescription updatePrescription(Long id, Long userId, PrescriptionCreateRequest request);

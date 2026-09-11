@@ -19,8 +19,11 @@ public class PrescriptionController {
 
     @GetMapping
     public ApiResponse<Page<Prescription>> list(Authentication a, @RequestParam(required = false) Long patientId,
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) String startDate,
+            @RequestParam(required = false) String endDate,
             @RequestParam(defaultValue = "1") int p, @RequestParam(defaultValue = "10") int s) {
-        return ApiResponse.success(service.listPrescriptions(patientId, (Long)a.getPrincipal(), p, s));
+        return ApiResponse.success(service.listPrescriptions(patientId, keyword, startDate, endDate, (Long)a.getPrincipal(), p, s));
     }
     @PostMapping
     public ApiResponse<Prescription> create(Authentication a, @Valid @RequestBody PrescriptionCreateRequest r) {

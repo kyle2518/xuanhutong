@@ -1,0 +1,15 @@
+fastapi>=0.115
+uvicorn[standard]>=0.34
+pydantic>=2.10
+pydantic-settings>=2.7
+langchain>=0.3,<1.0
+langchain-core>=0.3,<1.0
+langchain-openai>=0.2,<1.0
+pymilvus>=2.5,<3.0
+sqlalchemy>=2.0
+pymysql>=1.1
+PyJWT>=2.10
+reportlab>=4.2
+httpx>=0.28
+tenacity>=9.0
+python-dotenv>=1.0
