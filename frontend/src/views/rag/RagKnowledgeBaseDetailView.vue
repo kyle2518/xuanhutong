@@ -178,8 +178,9 @@ onMounted(async () => {
               style="flex: 1;"
               @keydown.enter.exact.prevent="ask"
             />
-            <NSpace vertical align="center" justify="center" style="width: 90px;">
+            <NSpace vertical align="center" justify="center" style="width: 100px;">
               <NButton type="primary" :loading="answering" style="width: 100%;" @click="ask">提问</NButton>
+              <div style="font-size: 11px; color: #999; text-align: center; width: 100%; line-height: 1;">检索条数</div>
               <NInputNumber v-model:value="topK" :min="1" :max="20" size="small" style="width: 100%;" />
             </NSpace>
           </div>

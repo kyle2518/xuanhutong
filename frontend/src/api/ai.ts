@@ -12,4 +12,13 @@ export const aiApi = {
   reject: (id: number) => request.post(`/ai/diagnoses/${id}/reject`),
   ingest: (data?: any) => request.post('/ai/knowledge/ingest', data),
   kbStatus: () => request.get('/ai/knowledge/status'),
+  uploadClassic: (file: File, bookTitle?: string) => {
+    const formData = new FormData()
+    formData.append('file', file)
+    if (bookTitle) formData.append('bookTitle', bookTitle)
+    return request.post('/ai/knowledge/upload', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    })
+  },
+  listClassics: () => request.get('/ai/knowledge/classics'),
 }

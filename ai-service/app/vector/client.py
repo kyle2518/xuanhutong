@@ -97,3 +97,30 @@ def count(client: MilvusClient) -> int:
     client.flush(COLLECTION)
     stats = client.get_collection_stats(COLLECTION)
     return int(stats.get("row_count", 0))
+
+
+def list_book_titles(client: MilvusClient) -> list[dict]:
+    """列出 tcm_classics 中各典籍（distinct book_title + chunk 数）。"""
+    import ast
+
+    client.flush(COLLECTION)
+    res = client.query(
+        collection_name=COLLECTION,
+        filter="id >= 0",
+        output_fields=["book_title"],
+        limit=10000,
+    )
+    data = getattr(res, "data", res) if not isinstance(res, list) else res
+    titles: dict[str, int] = {}
+    for item in data:
+        bt = None
+        if isinstance(item, dict):
+            bt = item.get("book_title")
+        elif isinstance(item, str):
+            try:
+                bt = ast.literal_eval(item).get("book_title")
+            except Exception:
+                continue
+        if bt:
+            titles[bt] = titles.get(bt, 0) + 1
+    return [{"book_title": k, "chunks": v} for k, v in titles.items()]

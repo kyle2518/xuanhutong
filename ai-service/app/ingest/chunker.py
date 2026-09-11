@@ -60,3 +60,19 @@ def chunk_book(book: dict, max_chars: int = 512, overlap: int = 30) -> list[Chun
                     chunks.append(Chunk(book["book_title"], chapter, idx, piece))
                     idx += 1
     return chunks
+
+
+def chunk_text(text: str, book_title: str, max_chars: int = 512, overlap: int = 30) -> list[Chunk]:
+    """上传的纯文本典籍切分：按空行分段落，超长段落按句读再切。"""
+    chunks: list[Chunk] = []
+    idx = 0
+    paragraphs = [p.strip() for p in text.split("\n\n") if p.strip()]
+    for para in paragraphs:
+        if len(para) <= max_chars:
+            chunks.append(Chunk(book_title, "", idx, para))
+            idx += 1
+        else:
+            for piece in _split_long(para, max_chars, overlap):
+                chunks.append(Chunk(book_title, "", idx, piece))
+                idx += 1
+    return chunks
