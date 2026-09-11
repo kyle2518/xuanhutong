@@ -35,6 +35,9 @@ class Settings(BaseSettings):
     milvus_uri: str = "http://localhost:19530"
     milvus_collection: str = "tcm_classics"
 
+    # rag-service（知识库检索，用于结合现代药理规范）
+    rag_base_url: str = "http://localhost:8000"
+
     # 古籍样例目录（相对 ai-service 根）
     classics_dir: str = "data/classics"
 

@@ -3,8 +3,11 @@
 - 不依赖 user_id 的工具在模块级定义；
 - 依赖 user_id 的（病人/病历）在 build_tools 内用闭包绑定，强制所有权约束。
 """
+import httpx
+import jwt
 from langchain_core.tools import tool
 
+from app.config import settings
 from app.db.read_sql import (
     get_classic_prescription,
     get_herb,
@@ -24,6 +27,30 @@ def _format_hits(hits: list[dict]) -> str:
         chapter = h.get("chapter") or ""
         lines.append(
             f"[{i}]《{h['book_title']}》{chapter}：{h['source_text']}（相似度 {h.get('score', 0):.3f}）"
+        )
+    return "\n".join(lines)
+
+
+def _search_knowledge_base(query: str, top_k: int, user_id: int) -> str:
+    """调 rag-service 检索知识库中的现代规范/规章制度文档。"""
+    token = jwt.encode({"sub": str(user_id)}, settings.jwt_secret, algorithm="HS256")
+    try:
+        resp = httpx.post(
+            f"{settings.rag_base_url.rstrip('/')}/api/rag/search",
+            headers={"Authorization": f"Bearer {token}"},
+            json={"query": query, "top_k": top_k},
+            timeout=30.0,
+        )
+        resp.raise_for_status()
+        hits = resp.json().get("hits", [])
+    except Exception as e:  # noqa: BLE001
+        return f"知识库检索失败：{e}"
+    if not hits:
+        return "知识库中未检索到相关规范文档。"
+    lines = []
+    for i, h in enumerate(hits, 1):
+        lines.append(
+            f"[{i}] {h.get('source', '')}：{h.get('chunk', '')}（相似度 {h.get('score', 0)}）"
         )
     return "\n".join(lines)
 
@@ -104,6 +131,11 @@ def build_tools(user_id: int) -> list:
             )
         return "\n".join(lines)
 
+    @tool
+    def search_knowledge_base(query: str, top_k: int = 5) -> str:
+        """检索知识库中的现代药理规范、处方管理规定、国家规章制度等文档（如某味药的现代剂量限制、毒性禁忌）。"""
+        return _search_knowledge_base(query, top_k, user_id)
+
     return [
         search_classics,
         get_patient_info,
@@ -111,4 +143,5 @@ def build_tools(user_id: int) -> list:
         lookup_herb,
         lookup_classic_prescription,
         check_herb_compatibility,
+        search_knowledge_base,
     ]
