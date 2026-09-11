@@ -29,6 +29,7 @@ const routes = [
       { path: 'appointments', name: 'Appointments', component: () => import('@/views/appointments/AppointmentListView.vue') },
       { path: 'appointments/qr', name: 'AppointmentQR', component: () => import('@/views/appointments/AppointmentQRView.vue') },
       { path: 'classics', name: 'ClassicPrescriptions', component: () => import('@/views/classics/ClassicPrescriptionListView.vue') },
+      { path: 'herbs', name: 'HerbManage', component: () => import('@/views/herbs/HerbManageView.vue') },
       { path: 'ai', name: 'AiDiagnosisList', component: () => import('@/views/ai/AiDiagnosisListView.vue') },
       { path: 'ai/new/:patientId?', name: 'AiDiagnosisCreate', component: () => import('@/views/ai/AiDiagnosisCreateView.vue') },
       { path: 'ai/:id', name: 'AiDiagnosisDetail', component: () => import('@/views/ai/AiDiagnosisDetailView.vue') },

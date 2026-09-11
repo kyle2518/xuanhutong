@@ -20,6 +20,7 @@ const menuOptions: MenuOption[] = [
   { label: () => renderLabel('👤', '病人管理'), key: '/patients' },
   { label: () => renderLabel('💊', '处方管理'), key: '/prescriptions' },
   { label: () => renderLabel('📦', '药材库存'), key: '/inventory' },
+  { label: () => renderLabel('🌿', '药材管理'), key: '/herbs' },
   { label: () => renderLabel('📅', '预约管理'), key: '/appointments' },
   { label: () => renderLabel('📜', '经典药方'), key: '/classics' },
   { label: () => renderLabel('🤖', 'AI辅助诊断'), key: '/ai' },
@@ -31,6 +32,7 @@ const activeKey = computed(() => {
   if (path.startsWith('/patients')) return '/patients'
   if (path.startsWith('/prescriptions')) return '/prescriptions'
   if (path.startsWith('/inventory')) return '/inventory'
+  if (path.startsWith('/herbs')) return '/herbs'
   if (path.startsWith('/appointments')) return '/appointments'
   if (path.startsWith('/classics')) return '/classics'
   if (path.startsWith('/ai')) return '/ai'
