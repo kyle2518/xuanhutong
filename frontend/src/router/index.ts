@@ -32,6 +32,8 @@ const routes = [
       { path: 'ai', name: 'AiDiagnosisList', component: () => import('@/views/ai/AiDiagnosisListView.vue') },
       { path: 'ai/new/:patientId?', name: 'AiDiagnosisCreate', component: () => import('@/views/ai/AiDiagnosisCreateView.vue') },
       { path: 'ai/:id', name: 'AiDiagnosisDetail', component: () => import('@/views/ai/AiDiagnosisDetailView.vue') },
+      { path: 'rag', name: 'RagKnowledgeBases', component: () => import('@/views/rag/RagKnowledgeBasesView.vue') },
+      { path: 'rag/knowledge-bases/:id', name: 'RagKnowledgeBaseDetail', component: () => import('@/views/rag/RagKnowledgeBaseDetailView.vue') },
     ]
   },
   { path: '/:pathMatch(.*)*', redirect: '/' }
