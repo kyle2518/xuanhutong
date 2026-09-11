@@ -65,8 +65,12 @@ jobs:
           echo "检测到变更，构建服务：$SERVICES"
           echo "services=$SERVICES" >> "$GITHUB_OUTPUT"
 
-      - name: 构建镜像
-        run: docker compose build ${{ steps.changed.outputs.services }}
+      - name: 构建镜像（串行，避免 Gradle 缓存锁冲突）
+        run: |
+          for svc in ${{ steps.changed.outputs.services }}; do
+            echo "==> 构建 $svc"
+            docker compose build "$svc"
+          done
 
       - name: 滚动更新
         run: |
