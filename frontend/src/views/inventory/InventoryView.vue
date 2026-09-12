@@ -15,6 +15,7 @@ const editForm = ref({ stockGrams: 0, minStockAlert: 0, unitPrice: 0 })
 
 const showAddModal = ref(false)
 const addHerbId = ref<number | null>(null)
+const addForm = ref({ stockGrams: 0, minStockAlert: 0, unitPrice: 0 })
 const addLoading = ref(false)
 const availableHerbs = ref<any[]>([])
 const herbSearchLoading = ref(false)
@@ -72,7 +73,7 @@ async function addHerb() {
   if (!addHerbId.value) { message.warning('请选择药材'); return }
   addLoading.value = true
   try {
-    await inventoryApi.create({ herbId: addHerbId.value })
+    await inventoryApi.create({ herbId: addHerbId.value, stockGrams: addForm.value.stockGrams, minStockAlert: addForm.value.minStockAlert, unitPrice: addForm.value.unitPrice })
     message.success('药材已添加到库存')
     showAddModal.value = false; addHerbId.value = null; availableHerbs.value = []
     fetchInventory()
@@ -80,7 +81,7 @@ async function addHerb() {
   finally { addLoading.value = false }
 }
 
-function openAddModal() { addHerbId.value = null; availableHerbs.value = []; showAddModal.value = true }
+function openAddModal() { addHerbId.value = null; addForm.value = { stockGrams: 0, minStockAlert: 0, unitPrice: 0 }; availableHerbs.value = []; showAddModal.value = true }
 
 onMounted(fetchInventory)
 </script>
@@ -127,8 +128,16 @@ onMounted(fetchInventory)
           <NSelect v-model:value="addHerbId" :options="availableHerbs" filterable remote clearable
             placeholder="输入药材名称搜索" @search="searchAvailableHerbs" :loading="herbSearchLoading" />
         </NFormItem>
+        <NFormItem label="库存(克)">
+          <NInputNumber v-model:value="addForm.stockGrams" :min="0" style="width:100%" />
+        </NFormItem>
+        <NFormItem label="预警值(克)">
+          <NInputNumber v-model:value="addForm.minStockAlert" :min="0" style="width:100%" />
+        </NFormItem>
+        <NFormItem label="单价(元/克)">
+          <NInputNumber v-model:value="addForm.unitPrice" :min="0" :step="0.01" style="width:100%" />
+        </NFormItem>
       </NForm>
-      <p style="font-size:12px;color:#999;margin-top:-8px;">选择药材后点击添加，初始库存为 0，可在库存列表中编辑具体数值。</p>
       <template #footer>
         <NSpace justify="end">
           <NButton @click="showAddModal = false">取消</NButton>

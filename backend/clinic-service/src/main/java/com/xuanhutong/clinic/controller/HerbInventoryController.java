@@ -1,5 +1,6 @@
 package com.xuanhutong.clinic.controller;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.xuanhutong.clinic.dto.request.HerbInventoryCreateRequest;
 import com.xuanhutong.clinic.dto.request.HerbInventoryUpdateRequest;
 import com.xuanhutong.common.dto.response.ApiResponse;
 import com.xuanhutong.clinic.service.HerbInventoryService;
@@ -23,8 +24,8 @@ public class HerbInventoryController {
         return ApiResponse.success(service.getInventoryItem(id, (Long)a.getPrincipal()));
     }
     @PostMapping
-    public ApiResponse<Map<String, Object>> create(Authentication a, @RequestBody Map<String, Object> req) {
-        return ApiResponse.success(service.createInventory((Long)a.getPrincipal(), Long.valueOf(req.get("herbId").toString())));
+    public ApiResponse<Map<String, Object>> create(Authentication a, @RequestBody HerbInventoryCreateRequest r) {
+        return ApiResponse.success(service.createInventory((Long)a.getPrincipal(), r.getHerbId(), r.getStockGrams(), r.getMinStockAlert(), r.getUnitPrice()));
     }
     @GetMapping("/available-herbs")
     public ApiResponse<Page<Map<String, Object>>> availableHerbs(Authentication a, @RequestParam(required = false) String k,

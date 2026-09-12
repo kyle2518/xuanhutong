@@ -47,12 +47,15 @@ public class HerbInventoryServiceImpl implements HerbInventoryService {
         m.put("lastRestockDate", inv.getLastRestockDate()); return m;
     }
 
-    public Map<String, Object> createInventory(Long userId, Long herbId) {
+    public Map<String, Object> createInventory(Long userId, Long herbId, BigDecimal stockGrams, BigDecimal minStockAlert, BigDecimal unitPrice) {
         var exist = invRepo.selectOne(new LambdaQueryWrapper<HerbInventory>().eq(HerbInventory::getUserId, userId).eq(HerbInventory::getHerbId, herbId));
         if (exist != null) return getInventoryItem(exist.getId(), userId);
         Herb herb = herbRepo.selectById(herbId); if (herb == null) throw new BusinessException(ErrorCode.HERB_NOT_FOUND);
         HerbInventory inv = new HerbInventory(); inv.setUserId(userId); inv.setHerbId(herbId);
-        inv.setStockGrams(BigDecimal.ZERO); inv.setLastRestockDate(LocalDate.now()); invRepo.insert(inv);
+        inv.setStockGrams(stockGrams != null ? stockGrams : BigDecimal.ZERO);
+        inv.setMinStockAlert(minStockAlert);
+        inv.setUnitPrice(unitPrice);
+        inv.setLastRestockDate(LocalDate.now()); invRepo.insert(inv);
         return getInventoryItem(inv.getId(), userId);
     }
 
