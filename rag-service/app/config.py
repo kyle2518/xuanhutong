@@ -6,7 +6,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 def _llm_api_key_default() -> str:
-    return os.environ.get("RAG_LLM_API_KEY", "") or os.environ.get("OPENAI_API_KEY", "")
+    return os.environ.get("DEEPSEEK_API_KEY", "") or os.environ.get("OPENAI_API_KEY", "")
 
 
 def _embedding_api_key_default() -> str:
@@ -26,11 +26,12 @@ class Settings(BaseSettings):
     milvus_uri: str = "http://localhost:19530"
     milvus_token: str = ""
 
-    llm_base_url: str = "https://api.openai.com/v1"
-    llm_model: str = "gpt-4o-mini"
+    # LLM 与 ai-service 统一走 DEEPSEEK_*（key/base_url/model 共用）
+    llm_base_url: str = Field(default="https://api.deepseek.com/v1", validation_alias="DEEPSEEK_BASE_URL")
+    llm_model: str = Field(default="deepseek-v4-pro", validation_alias="DEEPSEEK_MODEL")
     llm_temperature: float = 0.2
     llm_timeout: float = 60.0
-    llm_api_key: str = Field(default_factory=_llm_api_key_default)
+    llm_api_key: str = Field(default_factory=_llm_api_key_default, validation_alias="DEEPSEEK_API_KEY")
 
     # embedding 与 ai-service 统一走 EMBEDDING_*（不带 RAG_ 前缀），共享同一个 DashScope 配置
     embedding_base_url: str | None = Field(default=None, validation_alias="EMBEDDING_BASE_URL")
