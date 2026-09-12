@@ -111,12 +111,12 @@ curl -X POST http://localhost:8080/api/rag/query \
 | `JWT_SECRET` | 空 | 与后端共享的 JWT 签名密钥（认证必需） |
 | `RAG_MILVUS_URI` | `http://localhost:19530` | Milvus 地址 |
 | `RAG_MILVUS_TOKEN` | 空 | Milvus 认证 token（如 `root:Milvus`） |
-| `RAG_LLM_BASE_URL` | `https://api.openai.com/v1` | Chat 模型 OpenAI 兼容地址 |
-| `RAG_LLM_API_KEY` | 空（回退 `OPENAI_API_KEY`） | Chat 模型 API Key |
-| `RAG_LLM_MODEL` | `gpt-4o-mini` | Chat 模型名 |
-| `RAG_LLM_TEMPERATURE` | `0.2` | 生成温度 |
-| `RAG_EMBEDDING_MODEL` | `text-embedding-3-small` | Embedding 模型名 |
-| `RAG_EMBEDDING_BASE_URL` / `RAG_EMBEDDING_API_KEY` | 复用 LLM | 可单独指定 Embedding 接口 |
+| `DEEPSEEK_BASE_URL` | `https://api.deepseek.com/v1` | Chat 模型 OpenAI 兼容地址（与 ai-service 共用） |
+| `DEEPSEEK_API_KEY` | 空（回退 `OPENAI_API_KEY`） | Chat 模型 API Key（与 ai-service 共用） |
+| `DEEPSEEK_MODEL` | `deepseek-v4-pro` | Chat 模型名（与 ai-service 共用） |
+| `RAG_LLM_TEMPERATURE` | `0.2` | 生成温度（rag 特有） |
+| `EMBEDDING_MODEL` | `text-embedding-v4` | Embedding 模型名（与 ai-service 共用） |
+| `EMBEDDING_BASE_URL` / `EMBEDDING_API_KEY` | 复用 LLM | Embedding 接口（与 ai-service 共用） |
 | `RAG_CHUNK_SIZE` / `RAG_CHUNK_OVERLAP` | `500` / `50` | 文本分块参数 |
 | `RAG_DEFAULT_TOP_K` | `5` | 默认检索条数 |
 | `RAG_MAX_FILE_SIZE_MB` | `20` | 单文档大小上限 |
