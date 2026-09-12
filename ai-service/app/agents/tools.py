@@ -13,6 +13,7 @@ from app.db.read_sql import (
     get_herb,
     get_medical_records as query_medical_records,
     get_patient,
+    get_prescriptions,
 )
 from app.rules.shibafan_shijiuwei import check_conflicts
 from app.vector.client import get_client, search
@@ -136,6 +137,22 @@ def build_tools(user_id: int) -> list:
         """检索知识库中的现代药理规范、处方管理规定、国家规章制度等文档（如某味药的现代剂量限制、毒性禁忌）。"""
         return _search_knowledge_base(query, top_k, user_id)
 
+    @tool
+    def get_prescription_history(patient_id: int, limit: int = 5) -> str:
+        """获取病人近期开过的药方（诊断、组成、剂量、时间），用于参考过往用药史。"""
+        rxs = get_prescriptions(patient_id, user_id, limit)
+        if not rxs:
+            return "该病人暂无过往药方记录。"
+        lines = []
+        for rx in rxs:
+            herbs = "、".join(f"{h['herb_name']}{h['dosage_grams']}g" for h in rx["herbs"])
+            signed = "已签" if rx["is_signed"] else "未签"
+            lines.append(
+                f"- {rx['created_at']} 方#{rx['id']}（{signed}）：诊断 {rx['diagnosis'] or '无'}；"
+                f"组成 {herbs or '无'}；{rx['total_doses']} 剂"
+            )
+        return "\n".join(lines)
+
     return [
         search_classics,
         get_patient_info,
@@ -144,4 +161,5 @@ def build_tools(user_id: int) -> list:
         lookup_classic_prescription,
         check_herb_compatibility,
         search_knowledge_base,
+        get_prescription_history,
     ]

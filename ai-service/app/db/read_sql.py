@@ -75,3 +75,39 @@ def get_user(user_id: int) -> dict | None:
             {"uid": user_id},
         ).mappings().first()
         return dict(row) if row else None
+
+
+def get_prescriptions(patient_id: int, user_id: int, limit: int = 5) -> list[dict]:
+    """查询病人近期药方（含组成、剂量、诊断、时间），供 AI 参考过往用药史。"""
+    with SessionLocal() as s:
+        rows = s.execute(
+            text(
+                "SELECT id, diagnosis, total_doses, is_signed, created_at "
+                "FROM prescriptions WHERE patient_id=:pid AND user_id=:uid AND is_deleted=0 "
+                "ORDER BY created_at DESC LIMIT :lim"
+            ),
+            {"pid": patient_id, "uid": user_id, "lim": limit},
+        ).mappings().all()
+        result = []
+        for r in rows:
+            items = s.execute(
+                text(
+                    "SELECT herb_name, dosage_grams FROM prescription_items "
+                    "WHERE prescription_id=:rid AND is_deleted=0 ORDER BY sort_order"
+                ),
+                {"rid": r["id"]},
+            ).mappings().all()
+            result.append(
+                {
+                    "id": r["id"],
+                    "diagnosis": r.get("diagnosis"),
+                    "total_doses": r.get("total_doses"),
+                    "is_signed": r.get("is_signed"),
+                    "created_at": r.get("created_at"),
+                    "herbs": [
+                        {"herb_name": it["herb_name"], "dosage_grams": it["dosage_grams"]}
+                        for it in items
+                    ],
+                }
+            )
+        return result
