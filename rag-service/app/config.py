@@ -10,9 +10,7 @@ def _llm_api_key_default() -> str:
 
 
 def _embedding_api_key_default() -> str:
-    return os.environ.get("RAG_EMBEDDING_API_KEY", "") or os.environ.get(
-        "OPENAI_API_KEY", ""
-    )
+    return os.environ.get("EMBEDDING_API_KEY", "") or os.environ.get("OPENAI_API_KEY", "")
 
 
 class Settings(BaseSettings):
@@ -34,9 +32,10 @@ class Settings(BaseSettings):
     llm_timeout: float = 60.0
     llm_api_key: str = Field(default_factory=_llm_api_key_default)
 
-    embedding_base_url: str | None = None
-    embedding_model: str = "text-embedding-3-small"
-    embedding_api_key: str = Field(default_factory=_embedding_api_key_default)
+    # embedding 与 ai-service 统一走 EMBEDDING_*（不带 RAG_ 前缀），共享同一个 DashScope 配置
+    embedding_base_url: str | None = Field(default=None, validation_alias="EMBEDDING_BASE_URL")
+    embedding_model: str = Field(default="text-embedding-v4", validation_alias="EMBEDDING_MODEL")
+    embedding_api_key: str = Field(default_factory=_embedding_api_key_default, validation_alias="EMBEDDING_API_KEY")
 
 
 @lru_cache
