@@ -15,9 +15,9 @@ import java.util.Map;
 public class HerbInventoryController {
     private final HerbInventoryService service;
     @GetMapping
-    public ApiResponse<Page<Map<String, Object>>> list(Authentication a, @RequestParam(required = false) String k,
+    public ApiResponse<Page<Map<String, Object>>> list(Authentication a, @RequestParam(required = false) String keyword,
             @RequestParam(required = false) Boolean low, @RequestParam(defaultValue = "1") int p, @RequestParam(defaultValue = "50") int s) {
-        return ApiResponse.success(service.listInventory((Long)a.getPrincipal(), k, low, p, s));
+        return ApiResponse.success(service.listInventory((Long)a.getPrincipal(), keyword, low, p, s));
     }
     @GetMapping("/{id}")
     public ApiResponse<Map<String, Object>> get(Authentication a, @PathVariable Long id) {
@@ -28,9 +28,9 @@ public class HerbInventoryController {
         return ApiResponse.success(service.createInventory((Long)a.getPrincipal(), r.getHerbId(), r.getStockGrams(), r.getMinStockAlert(), r.getUnitPrice()));
     }
     @GetMapping("/available-herbs")
-    public ApiResponse<Page<Map<String, Object>>> availableHerbs(Authentication a, @RequestParam(required = false) String k,
+    public ApiResponse<Page<Map<String, Object>>> availableHerbs(Authentication a, @RequestParam(required = false) String keyword,
             @RequestParam(defaultValue = "1") int p, @RequestParam(defaultValue = "20") int s) {
-        return ApiResponse.success(service.getAvailableHerbs((Long)a.getPrincipal(), k, p, s));
+        return ApiResponse.success(service.getAvailableHerbs((Long)a.getPrincipal(), keyword, p, s));
     }
     @PutMapping("/{id}")
     public ApiResponse<Void> update(Authentication a, @PathVariable Long id, @RequestBody HerbInventoryUpdateRequest r) {
